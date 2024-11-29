@@ -1,0 +1,150 @@
+﻿<Window x:Class="ShapeMatching.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ShapeMatching"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="700" Width="800" 
+		ResizeMode="NoResize">
+
+	<Grid>
+		<Grid.ColumnDefinitions>
+			<ColumnDefinition Width="0.5*" />
+			<ColumnDefinition Width="0.001*" />
+			<ColumnDefinition Width="0.5*" />
+		</Grid.ColumnDefinitions>
+
+		<!-- Model -->
+		<Grid Grid.Column="0" Margin="10">
+			<Grid.RowDefinitions>
+				<RowDefinition Height="0.06*" />
+				<RowDefinition Height="0.4*" />
+				<RowDefinition Height="0.4*" />
+				<RowDefinition Height="0.14*" />
+			</Grid.RowDefinitions>
+			
+			<!-- Model: Start, Select -->
+			<Grid Grid.Row="0">
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition Width="0.8*" />
+					<ColumnDefinition Width="0.1*" />
+					<ColumnDefinition Width="0.1*" />
+				</Grid.ColumnDefinitions>
+
+				<Label Grid.Column="0" Content="Model" VerticalAlignment="Center" FontSize="18" FontFamily="Arial" FontWeight="Bold"/>
+				<Button x:Name="btn_model_start" Grid.Column="1" Margin="5 7 5 7" Click="Btn_Click" Content="▶️" Background="#FFBBCDE6"/>
+				<Button x:Name="btn_model_search" Grid.Column="2" Margin="5 7 5 7" Click="Btn_Click" Content="📂" Background="#FFFFB88F"/>
+
+			</Grid>
+
+			<!-- Model: Image -->
+			<Grid Grid.Row="1" Margin="10">
+				<Image x:Name="image_model" Stretch="Uniform"/>
+			</Grid>
+
+			<!-- Model: List -->
+			<Grid Grid.Row="2" Margin="10">
+				<ListView x:Name="list_model" />
+			</Grid>
+			
+			<!-- Model: Options -->
+			<Grid Grid.Row="3" Margin="10">
+				<Grid.RowDefinitions>
+					<RowDefinition Height="0.5*" />
+					<RowDefinition Height="0.5*" />
+				</Grid.RowDefinitions>
+
+				<Grid Grid.Row="0">
+					<Grid.ColumnDefinitions>
+						<ColumnDefinition Width="0.5*" />
+						<ColumnDefinition Width="0.5*" />
+					</Grid.ColumnDefinitions>
+
+					<Label x:Name="label_minsize" Grid.Column="0" Content="Min Size" VerticalAlignment="Center" FontSize="14" FontFamily="Arial" />
+					<Slider x:Name="slider_minsize" Grid.Column="1" VerticalAlignment="Center"/>
+				</Grid>
+
+				<Grid Grid.Row="1">
+					<Grid.ColumnDefinitions>
+						<ColumnDefinition Width="0.5*" />
+						<ColumnDefinition Width="0.5*" />
+					</Grid.ColumnDefinitions>
+
+					<Label x:Name="label_maxsize" Grid.Column="0" Content="Max Size" VerticalAlignment="Center" FontSize="14" FontFamily="Arial" />
+					<Slider x:Name="slider_maxsize" Grid.Column="1" VerticalAlignment="Center"/>
+				</Grid>
+
+			</Grid>
+		</Grid>
+
+
+		<Border Grid.Column="1" BorderBrush="#FF626262" BorderThickness="1"/>
+
+		<!-- Target -->
+		<Grid Grid.Column="2" Margin="10">
+			<Grid.RowDefinitions>
+				<RowDefinition Height="0.06*" />
+				<RowDefinition Height="0.4*" />
+				<RowDefinition Height="0.4*" />
+				<RowDefinition Height="0.14*" />
+			</Grid.RowDefinitions>
+
+			<!-- Target: Start, Select -->
+			<Grid Grid.Row="0">
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition Width="0.8*" />
+					<ColumnDefinition Width="0.1*" />
+					<ColumnDefinition Width="0.1*" />
+				</Grid.ColumnDefinitions>
+
+				<Label Grid.Column="0" Content="Target" VerticalAlignment="Center"  FontSize="18" FontFamily="Arial" FontWeight="Bold"/>
+				<Button x:Name="btn_target_start" Grid.Column="1" Margin="5 7 5 7" Click="Btn_Click" Content="▶️" Background="#FFBBCDE6"/>
+				<Button x:Name="btn_target_search" Grid.Column="2" Margin="5 7 5 7" Click="Btn_Click" Content="📂" Background="#FFFFB88F"/>
+
+			</Grid>
+
+			<!-- Target: Image -->
+			<Grid Grid.Row="1" Margin="10">
+				<Image x:Name="image_target" Stretch="Uniform"/>
+			</Grid>
+
+			<!-- Target: List -->
+			<Grid Grid.Row="2" Margin="10">
+				<ListView x:Name="list_target" 
+						  ItemsSource="{Binding Results}" 
+						  SelectedItem="{Binding SelectedResult, Mode=TwoWay}" />
+			</Grid>
+
+			<!-- Target: Options -->
+			<Grid Grid.Row="3" Margin="10">
+				<Grid.RowDefinitions>
+					<RowDefinition Height="0.5*" />
+					<RowDefinition Height="0.5*" />
+				</Grid.RowDefinitions>
+
+				<Grid Grid.Row="0">
+					<Grid.ColumnDefinitions>
+						<ColumnDefinition Width="0.5*" />
+						<ColumnDefinition Width="0.5*" />
+					</Grid.ColumnDefinitions>
+
+					<Label x:Name="label_score" Grid.Column="0" Content="Score" VerticalAlignment="Center" FontSize="14" FontFamily="Arial"/>
+					<Slider x:Name="slider_score" Grid.Column="1" VerticalAlignment="Center"/>
+				</Grid>
+
+				<Grid Grid.Row="1">
+					<Grid.ColumnDefinitions>
+						<ColumnDefinition Width="0.5*" />
+						<ColumnDefinition Width="0.5*" />
+					</Grid.ColumnDefinitions>
+
+					<Label x:Name="label_aoi" Grid.Column="0" Content="AOI" VerticalAlignment="Center" FontSize="14" FontFamily="Arial"/>
+					<Slider x:Name="slider_aoi" Grid.Column="1" VerticalAlignment="Center"/>
+				</Grid>
+
+			</Grid>
+		</Grid>
+
+	</Grid>
+</Window>
