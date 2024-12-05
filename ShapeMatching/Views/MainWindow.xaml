@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ShapeMatching"
         mc:Ignorable="d"
-        Title="MainWindow" Height="700" Width="800" 
+        Title="MainWindow" Height="1100" Width="1200" 
 		ResizeMode="NoResize">
 
 	<Grid>
@@ -33,19 +33,30 @@
 				</Grid.ColumnDefinitions>
 
 				<Label Grid.Column="0" Content="Model" VerticalAlignment="Center" FontSize="18" FontFamily="Arial" FontWeight="Bold"/>
-				<Button x:Name="btn_model_start" Grid.Column="1" Margin="5 7 5 7" Click="Btn_Click" Content="▶️" Background="#FFBBCDE6"/>
-				<Button x:Name="btn_model_search" Grid.Column="2" Margin="5 7 5 7" Click="Btn_Click" Content="📂" Background="#FFFFB88F"/>
+				<Button x:Name="btn_model_start" Grid.Column="1" Margin="5 7 5 7" Command="{Binding Func_StartModel}" Content="▶️" Background="#FFBBCDE6"/>
+				<Button x:Name="btn_model_search" Grid.Column="2" Margin="5 7 5 7" Command="{Binding Func_SelectModel}" Content="📂" Background="#FFFFB88F"/>
 
 			</Grid>
 
 			<!-- Model: Image -->
 			<Grid Grid.Row="1" Margin="10">
-				<Image x:Name="image_model" Stretch="Uniform"/>
+				<Image x:Name="image_model" Source="{Binding Model}" Stretch="Uniform"/>
 			</Grid>
 
 			<!-- Model: List -->
 			<Grid Grid.Row="2" Margin="10">
-				<ListView x:Name="list_model" />
+				<ListView x:Name="list_model" 
+						  SelectionChanged="ListChangedModel"
+						  ItemsSource="{Binding CntrModel}" 
+						  SelectedItem="{Binding Sel_CntrModel, Mode=TwoWay}" >
+					<ListView.View>
+						<GridView>
+							<GridViewColumn Header="Rect" Width="300" DisplayMemberBinding="{Binding Rect}"/>
+							<GridViewColumn Header="Arc Length" Width="100" DisplayMemberBinding="{Binding ArcLen}"/>
+							<GridViewColumn Header="# of Contours" Width="100" DisplayMemberBinding="{Binding Contours.Count}"/>
+						</GridView>
+					</ListView.View>
+				</ListView>
 			</Grid>
 			
 			<!-- Model: Options -->
@@ -61,20 +72,9 @@
 						<ColumnDefinition Width="0.5*" />
 					</Grid.ColumnDefinitions>
 
-					<Label x:Name="label_minsize" Grid.Column="0" Content="Min Size" VerticalAlignment="Center" FontSize="14" FontFamily="Arial" />
-					<Slider x:Name="slider_minsize" Grid.Column="1" VerticalAlignment="Center"/>
+					<Label Grid.Column="0" Content="Min Size (Model)" VerticalAlignment="Center" FontSize="14" FontFamily="Arial" />
+					<TextBox Grid.Column="1" Text="{Binding ModelSize}" VerticalAlignment="Center"/>
 				</Grid>
-
-				<Grid Grid.Row="1">
-					<Grid.ColumnDefinitions>
-						<ColumnDefinition Width="0.5*" />
-						<ColumnDefinition Width="0.5*" />
-					</Grid.ColumnDefinitions>
-
-					<Label x:Name="label_maxsize" Grid.Column="0" Content="Max Size" VerticalAlignment="Center" FontSize="14" FontFamily="Arial" />
-					<Slider x:Name="slider_maxsize" Grid.Column="1" VerticalAlignment="Center"/>
-				</Grid>
-
 			</Grid>
 		</Grid>
 
@@ -99,21 +99,29 @@
 				</Grid.ColumnDefinitions>
 
 				<Label Grid.Column="0" Content="Target" VerticalAlignment="Center"  FontSize="18" FontFamily="Arial" FontWeight="Bold"/>
-				<Button x:Name="btn_target_start" Grid.Column="1" Margin="5 7 5 7" Click="Btn_Click" Content="▶️" Background="#FFBBCDE6"/>
-				<Button x:Name="btn_target_search" Grid.Column="2" Margin="5 7 5 7" Click="Btn_Click" Content="📂" Background="#FFFFB88F"/>
+				<Button x:Name="btn_target_start" Grid.Column="1" Margin="5 7 5 7" Command="{Binding Func_StartTarget}" Content="▶️" Background="#FFBBCDE6"/>
+				<Button x:Name="btn_target_search" Grid.Column="2" Margin="5 7 5 7" Command="{Binding Func_SelectTarget}"  Content="📂" Background="#FFFFB88F"/>
 
 			</Grid>
 
 			<!-- Target: Image -->
 			<Grid Grid.Row="1" Margin="10">
-				<Image x:Name="image_target" Stretch="Uniform"/>
+				<Image x:Name="image_target" Source="{Binding Target}" Stretch="Uniform"/>
 			</Grid>
 
 			<!-- Target: List -->
 			<Grid Grid.Row="2" Margin="10">
 				<ListView x:Name="list_target" 
+						  SelectionChanged="ListChangedTarget"
 						  ItemsSource="{Binding Results}" 
-						  SelectedItem="{Binding SelectedResult, Mode=TwoWay}" />
+						  SelectedItem="{Binding Sel_Result, Mode=TwoWay}" >
+					<ListView.View>
+						<GridView>
+							<GridViewColumn Header="Rect" Width="400" DisplayMemberBinding="{Binding Rect}"/>
+							<GridViewColumn Header="Mismatch" Width="100" DisplayMemberBinding="{Binding Mismatch}"/>
+						</GridView>
+					</ListView.View>
+				</ListView>
 			</Grid>
 
 			<!-- Target: Options -->
@@ -129,8 +137,8 @@
 						<ColumnDefinition Width="0.5*" />
 					</Grid.ColumnDefinitions>
 
-					<Label x:Name="label_score" Grid.Column="0" Content="Score" VerticalAlignment="Center" FontSize="14" FontFamily="Arial"/>
-					<Slider x:Name="slider_score" Grid.Column="1" VerticalAlignment="Center"/>
+					<Label Grid.Column="0" Content="Mismatch (the lower the better)" VerticalAlignment="Center" FontSize="14" FontFamily="Arial"/>
+					<TextBox Grid.Column="1" Text="{Binding Mismatch}" VerticalAlignment="Center" />
 				</Grid>
 
 				<Grid Grid.Row="1">
@@ -139,8 +147,8 @@
 						<ColumnDefinition Width="0.5*" />
 					</Grid.ColumnDefinitions>
 
-					<Label x:Name="label_aoi" Grid.Column="0" Content="AOI" VerticalAlignment="Center" FontSize="14" FontFamily="Arial"/>
-					<Slider x:Name="slider_aoi" Grid.Column="1" VerticalAlignment="Center"/>
+					<Label Grid.Column="0" Content="Min Size (Model)" VerticalAlignment="Center" FontSize="14" FontFamily="Arial" />
+					<TextBox Grid.Column="1" Text="{Binding TargetSize }" VerticalAlignment="Center"/>
 				</Grid>
 
 			</Grid>

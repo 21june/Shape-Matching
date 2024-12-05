@@ -13,15 +13,10 @@ namespace ShapeMatching.Models
 	public class ResultData : ObservableObject
 	{
 		// Result Rectangle
-		private Rect _rect;
-		public Rect Rect { get { return _rect; } set { SetProperty(ref _rect, value); } }
+		private OpenCvSharp.Rect _rect;
+		public OpenCvSharp.Rect Rect { get { return _rect; } set { SetProperty(ref _rect, value); } }
 		// Score
-		private double _score;
-		public double Score { get { return _score; } set { SetProperty(ref _score, value); } }
-
-		public override string ToString()
-		{
-			return "Rect: ( " + Rect + " )" + " / Accuracy: " + ( Score * 100 ) + " %";
-		}
+		private double _mismatch;
+		public double Mismatch { get { return _mismatch; } set { SetProperty(ref _mismatch, value); } }
 	}
 }
