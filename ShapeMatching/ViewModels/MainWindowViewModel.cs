@@ -13,6 +13,9 @@ using OpenCvSharp;
 using System.Windows.Media.Imaging;
 using OpenCvSharp.WpfExtensions;
 using System.Collections.ObjectModel;
+using ShapeMatching.Util;
+using static System.Net.WebRequestMethods;
+using System.DirectoryServices;
 
 namespace ShapeMatching.ViewModels
 {
@@ -38,10 +41,12 @@ namespace ShapeMatching.ViewModels
 
 		// Binding Image
 		private Mat _modelMat;
+		private Mat _modelPreproMat;
 		private BitmapSource _model;
 		public BitmapSource Model { get => _model; set => SetProperty(ref _model, value); }
 
 		private Mat _targetMat;
+		private Mat _targetPreproMat;
 		private BitmapSource _target;
 		public BitmapSource Target { get => _target; set => SetProperty(ref _target, value); }
 
@@ -53,6 +58,12 @@ namespace ShapeMatching.ViewModels
 		private double _mismatch = 0.01;
 		public double Mismatch { get => _mismatch; set => SetProperty(ref _mismatch, value); }
 
+
+		private bool _modelPrecCheck = false;
+		public bool ModelPrecCheck { get => _modelPrecCheck; set => SetProperty(ref _modelPrecCheck, value); }
+
+		private bool _targetPrecCheck = false;
+		public bool TargetPrecCheck { get => _targetPrecCheck; set => SetProperty(ref _targetPrecCheck, value); }
 
 		// Binding Command...
 		public ICommand Func_SelectModel { get; }
@@ -78,7 +89,7 @@ namespace ShapeMatching.ViewModels
 
 		private void SelectModel()
 		{
-			string path = LoadFile();
+			string path = Utils.LoadFile();
 			if (path == null) return;
 			CntrModel.Clear();
 
@@ -93,6 +104,7 @@ namespace ShapeMatching.ViewModels
 			Cv2.GaussianBlur(src, src, new OpenCvSharp.Size(5, 5), 0);
 			Cv2.Threshold(src, src, 60, 255, ThresholdTypes.Binary);
 			Cv2.AdaptiveThreshold(src, src, 255, AdaptiveThresholdTypes.GaussianC, ThresholdTypes.BinaryInv, 5, 2);
+			_modelPreproMat = src.Clone();
 
 			OpenCvSharp.Point[][] contours;
 			HierarchyIndex[] hierarchy;
@@ -117,24 +129,18 @@ namespace ShapeMatching.ViewModels
 					CntrModel.Add(new ContourData { Rect = boundbox, ArcLen = arclen, Contours = p.ToList() }); ;
 				}
 			}
-
 			Model = src.ToBitmapSource();
 		}
 
 		private void SelectTarget()
 		{
 			Results.Clear();
-			string path = LoadFile();
+			string path = Utils.LoadFile();
 			if (path == null) return;
 
 			_targetMat = Cv2.ImRead(path, ImreadModes.Grayscale);
+			Target = _targetMat.ToBitmapSource();
 
-			Mat src = _targetMat.Clone();
-			Cv2.GaussianBlur(src, src, new OpenCvSharp.Size(5, 5), 0);
-			Cv2.Threshold(src, src, 60, 255, ThresholdTypes.Binary);
-			Cv2.AdaptiveThreshold(src, src, 255, AdaptiveThresholdTypes.GaussianC, ThresholdTypes.BinaryInv, 5, 2);
-			Cv2.FindContours(src, out CntrTarget, out HierarchiesTarget, RetrievalModes.External, ContourApproximationModes.ApproxTC89KCOS);
-			Target = src.ToBitmapSource();
 		}
 
 		private void StartTarget()
@@ -145,8 +151,13 @@ namespace ShapeMatching.ViewModels
 				return;
 
 			Mat src = _targetMat.Clone();
-			Cv2.CvtColor(src, src, ColorConversionCodes.GRAY2RGB);
+			Cv2.GaussianBlur(src, src, new OpenCvSharp.Size(5, 5), 0);
+			Cv2.Threshold(src, src, 60, 255, ThresholdTypes.Binary);
+			Cv2.AdaptiveThreshold(src, src, 255, AdaptiveThresholdTypes.GaussianC, ThresholdTypes.BinaryInv, 5, 2);
+			_targetPreproMat = src.Clone();
 
+			Cv2.FindContours(src, out CntrTarget, out HierarchiesTarget, RetrievalModes.External, ContourApproximationModes.ApproxTC89KCOS);
+			Cv2.CvtColor(src, src, ColorConversionCodes.GRAY2RGB);
 			for (int i = 0; i < CntrTarget.Length; i++)
 			{
 				// Matching Shapes...
@@ -156,12 +167,23 @@ namespace ShapeMatching.ViewModels
 				// 임계값을 초과한 Contour 강조 표시
 				if (mis < Mismatch && arclen > TargetSize)
 				{
+					OpenCvSharp.Point? pt = Utils.CalculateCentroid(CntrTarget[i]);
+					if (pt.HasValue)
+					{
+						double arclen_mdl = Cv2.ArcLength(Sel_CntrModel.Contours, true);
+						double scale = Utils.CalculateScale(arclen_mdl, arclen);
+						string str_scale = string.Format("Scale: {0:F3}", scale);
+						Cv2.Circle(src, pt.Value, 5, Scalar.Red, 3);
+						Cv2.PutText(src, str_scale, pt.Value, HersheyFonts.HersheyTriplex, 0.5, Scalar.Blue);
+					}
+
 					OpenCvSharp.Rect boundingRect = Cv2.BoundingRect(CntrTarget[i]);
 					Cv2.Rectangle(src, boundingRect, Scalar.Red, 2); // 빨간 네모로 표시
 					Results.Add(new ResultData { Rect = boundingRect, Mismatch = mis });
 				}
 
 			}
+
 			Target = src.ToBitmapSource();
 		}
 
@@ -170,7 +192,13 @@ namespace ShapeMatching.ViewModels
 			if (Sel_CntrModel == null)
 				return;
 
-			Mat src = _modelMat.Clone();
+			Mat src;
+
+			if (ModelPrecCheck)
+				src = _modelPreproMat.Clone();
+			else
+				src = _modelMat.Clone();
+
 			Cv2.Rectangle(src, Sel_CntrModel.Rect, new Scalar(255, 255, 255), 5);
 			Model = src.ToBitmapSource();
 		}
@@ -179,22 +207,17 @@ namespace ShapeMatching.ViewModels
 			if (Sel_Result == null)
 				return;
 
-			Mat src = _targetMat.Clone();
+			Mat src;
+
+			if (TargetPrecCheck)
+				src = _targetPreproMat.Clone();
+			else
+				src = _targetMat.Clone();
+
 			Cv2.Rectangle(src, Sel_Result.Rect, new Scalar(255, 255, 255), 5);
 			Target = src.ToBitmapSource();
 		}
 
-
-		private string LoadFile()
-		{
-			OpenFileDialog openFileDialog = new OpenFileDialog();
-			openFileDialog.Filter = "PNG files (*.png)|*.png|BMP files (*.bmp)|*.bmp|JPG files (*.jpg)|*.jpg|JPEG files (*.jpeg)|*.jpeg|All files (*.*)|*.*";
-			if (openFileDialog.ShowDialog() == true)
-			{
-				return openFileDialog.FileName;
-			}
-			return null;
-		}
 
 	}
 

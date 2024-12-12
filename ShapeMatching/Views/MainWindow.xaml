@@ -27,14 +27,16 @@
 			<!-- Model: Start, Select -->
 			<Grid Grid.Row="0">
 				<Grid.ColumnDefinitions>
-					<ColumnDefinition Width="0.8*" />
+					<ColumnDefinition Width="0.3*" />
+					<ColumnDefinition Width="0.5*" />
 					<ColumnDefinition Width="0.1*" />
 					<ColumnDefinition Width="0.1*" />
 				</Grid.ColumnDefinitions>
 
 				<Label Grid.Column="0" Content="Model" VerticalAlignment="Center" FontSize="18" FontFamily="Arial" FontWeight="Bold"/>
-				<Button x:Name="btn_model_start" Grid.Column="1" Margin="5 7 5 7" Command="{Binding Func_StartModel}" Content="▶️" Background="#FFBBCDE6"/>
-				<Button x:Name="btn_model_search" Grid.Column="2" Margin="5 7 5 7" Command="{Binding Func_SelectModel}" Content="📂" Background="#FFFFB88F"/>
+				<CheckBox x:Name="check_model" Grid.Column="1" IsChecked="{Binding ModelPrecCheck}" Content="Preprocess Image" FontSize="20" VerticalContentAlignment="Center" />
+				<Button x:Name="btn_model_start" Grid.Column="2" Margin="5 7 5 7" Command="{Binding Func_StartModel}" Content="▶️" Background="#FFBBCDE6"/>
+				<Button x:Name="btn_model_search" Grid.Column="3" Margin="5 7 5 7" Command="{Binding Func_SelectModel}" Content="📂" Background="#FFFFB88F"/>
 
 			</Grid>
 
@@ -93,14 +95,16 @@
 			<!-- Target: Start, Select -->
 			<Grid Grid.Row="0">
 				<Grid.ColumnDefinitions>
-					<ColumnDefinition Width="0.8*" />
+					<ColumnDefinition Width="0.3*" />
+					<ColumnDefinition Width="0.5*" />
 					<ColumnDefinition Width="0.1*" />
 					<ColumnDefinition Width="0.1*" />
 				</Grid.ColumnDefinitions>
 
 				<Label Grid.Column="0" Content="Target" VerticalAlignment="Center"  FontSize="18" FontFamily="Arial" FontWeight="Bold"/>
-				<Button x:Name="btn_target_start" Grid.Column="1" Margin="5 7 5 7" Command="{Binding Func_StartTarget}" Content="▶️" Background="#FFBBCDE6"/>
-				<Button x:Name="btn_target_search" Grid.Column="2" Margin="5 7 5 7" Command="{Binding Func_SelectTarget}"  Content="📂" Background="#FFFFB88F"/>
+				<CheckBox x:Name="check_target" Grid.Column="1" IsChecked="{Binding TargetPrecCheck}" Content="Preprocess Image" FontSize="20" VerticalContentAlignment="Center" />
+				<Button x:Name="btn_target_start" Grid.Column="2" Margin="5 7 5 7" Command="{Binding Func_StartTarget}" Content="▶️" Background="#FFBBCDE6"/>
+				<Button x:Name="btn_target_search" Grid.Column="3" Margin="5 7 5 7" Command="{Binding Func_SelectTarget}"  Content="📂" Background="#FFFFB88F"/>
 
 			</Grid>
 
@@ -137,7 +141,7 @@
 						<ColumnDefinition Width="0.5*" />
 					</Grid.ColumnDefinitions>
 
-					<Label Grid.Column="0" Content="Mismatch (the lower the better)" VerticalAlignment="Center" FontSize="14" FontFamily="Arial"/>
+					<Label Grid.Column="0" Content="Mismatch (The lower, the more similar.)" VerticalAlignment="Center" FontSize="14" FontFamily="Arial"/>
 					<TextBox Grid.Column="1" Text="{Binding Mismatch}" VerticalAlignment="Center" />
 				</Grid>
 
